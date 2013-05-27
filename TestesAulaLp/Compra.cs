@@ -8,68 +8,141 @@ namespace TestesAulaLp
     class Compra
     {
         private DateTime data;
-        private List<Item> itens = new List<Item>();
+        private List<Pedido> pedidos = new List<Pedido>();
         private Loja loja;
+        private NotaFiscal notaFiscal;
+        private Cliente cliente;
 
         public Compra(Loja loja)
         {
             this.data = DateTime.Now;
+            
             this.loja = loja;
             loja.AddCompra(this);
         }
 
-        public void AddItem(Item item)
+        public void AddPedido(Pedido pedido)
         {
-            itens.Add(item);
+            this.pedidos.Add(pedido);
         }
 
-        public void AddItens(List<Item> itens)
+        public void AddPedidos(List<Pedido> pedidos)
         {
-            this.itens = itens;
+            this.pedidos = pedidos;
         }
 
-        public double Total()
+        public void SetCliente(Cliente cliente)
         {
-            double temp = 0;
-            foreach (Item item in itens)
+            this.cliente = cliente;
+        }
+
+        public NotaFiscal EmitirNotaFiscal()
+        {
+            double tempValor = 0;
+            foreach (Pedido item in pedidos)
             {
-                temp += item.Preco * item.Quantidade;
+                tempValor += item.ValorTotal();
             }
-            return temp;
+            this.notaFiscal = new NotaFiscal(tempValor, this.cliente.Cpf);
+            return this.notaFiscal;
         }
 
         public void Imprime()
         {
-            Console.WriteLine("Pedido da Data {0}\n", this.data);
-            Console.WriteLine("Pedido feito na Loja {0}, Matriz {1}", loja.Nome, loja.Matriz.Nome);
-            Console.WriteLine("Endereço Matriz: {0}, {1}, {2} - Cidade {3} - Estado {4}", loja.Matriz.Endereco.Logradouro, loja.Matriz.Endereco.Numero, loja.Matriz.Endereco.Cep, loja.Matriz.Endereco.Cidade.Nome, loja.Matriz.Endereco.Cidade.Estado.Nome);
-            Console.WriteLine("Endereço Loja: {0}, {1}, {2} - Cidade {3} - Estado {4}", loja.Endereco.Logradouro, loja.Endereco.Numero, loja.Endereco.Cep, loja.Endereco.Cidade.Nome, loja.Endereco.Cidade.Estado.Nome);
-            foreach (Item item in itens)
+            foreach (Pedido pedido in pedidos)
             {
-                double subtotal = 0;
-                subtotal = item.Preco * item.Quantidade;
-                Console.WriteLine("Item: {0}, Quantidade: {1}, Preço: {2}, Subtotal: {3}", item.Nome, item.Quantidade, item.Preco, subtotal);
+                Console.WriteLine("Compra da Data {0}\n", this.data);
+                Console.WriteLine("Compra feito na Loja {0}, Matriz {1}", loja.Nome, loja.Matriz.Nome);
+                Console.WriteLine("Endereço Matriz: {0}, {1}, {2} - Cidade {3} - Estado {4}", loja.Matriz.Endereco.Logradouro, loja.Matriz.Endereco.Numero, loja.Matriz.Endereco.Cep, loja.Matriz.Endereco.Cidade.Nome, loja.Matriz.Endereco.Cidade.Estado.Nome);
+                Console.WriteLine("Endereço Loja: {0}, {1}, {2} - Cidade {3} - Estado {4}", loja.Endereco.Logradouro, loja.Endereco.Numero, loja.Endereco.Cep, loja.Endereco.Cidade.Nome, loja.Endereco.Cidade.Estado.Nome);
+
+                foreach (ItemPedido item in pedido.GetItensPedido())
+                {
+                    Console.WriteLine("Item: {0}, Quantidade: {1}, Preço: {2}, Subtotal: {3}", item.Produto.Nome, item.Quantidade, item.Produto.Valor, item.Quantidade * item.Produto.Valor);
+                }
+                Console.WriteLine("Total do Pedido: {0}\n", pedido.ValorTotal());
             }
-            Console.WriteLine("Total do Pedido: {0}\n", this.Total());
         }
     }
 
-    class Item
+    class NotaFiscal
+    {
+        private double valor;
+        private string cpf;
+
+        public NotaFiscal(double valor, string cpf)
+        {
+            this.valor = valor;
+            this.cpf = cpf;
+        }
+
+        public double Valor { get { return this.valor; } }
+        public string Cpf { get { return this.cpf; } }
+    }
+
+    class Pedido
+    {
+        private double valorTotal;
+        private List<ItemPedido> itensPedido = new List<ItemPedido>();
+
+        public double ValorTotal()
+        {
+            double tempTotal = 0;
+            foreach (ItemPedido item in itensPedido)
+            {
+                tempTotal += item.Produto.Valor * item.Quantidade;
+            }
+            this.valorTotal = tempTotal;
+            return tempTotal;
+        }
+
+        public void ItensPedido(List<ItemPedido> itensPedido)
+        {
+            this.itensPedido = itensPedido;
+        }
+
+        public void AddItem(ItemPedido item)
+        {
+            itensPedido.Add(item);
+        }
+
+        public List<ItemPedido> GetItensPedido()
+        {
+            return this.itensPedido;
+        }
+    }
+
+    class ItemPedido
+    {
+        private int quantidade;
+        private Produto produto;
+
+        public ItemPedido(int quantidade, Produto produto)
+        {
+            this.quantidade = quantidade;
+            this.produto = produto;
+        }
+
+        public int Quantidade { get { return this.quantidade; } }
+        public Produto Produto { get { return this.produto; } }
+    }
+
+    class Produto
     {
         private string nome;
-        private double preco;
-        private int quantidade;
+        private string descricao;
+        private double valor;
 
-        public Item(string nome, double preco, int quantidade)
+        public Produto(string nome, string descricao, double valor)
         {
             this.nome = nome;
-            this.preco = preco;
-            this.quantidade = quantidade;
+            this.descricao = descricao;
+            this.valor = valor;
         }
 
         public string Nome { get { return this.nome; } }
-        public double Preco { get { return this.preco; } }
-        public int Quantidade { get { return this.quantidade; } }
+        public string Descricao { get { return this.descricao; } }
+        public double Valor { get { return this.valor; } }
     }
 
     class Cliente
@@ -87,17 +160,28 @@ namespace TestesAulaLp
         public string Nome { get { return this.nome; } }
         public string Cpf { get { return this.cpf; } }
 
-        public void AddCompra(Compra compra, List<Item> itens)
+        public void AddCompra(Compra compra, List<Pedido> itens)
         {
             compras.Add(compra);
-            compra.AddItens(itens);
+            compra.AddPedidos(itens);
+            compra.SetCliente(this);
+        }
+
+        public void AddCompra(Compra compra, Pedido pedido)
+        {
+            compras.Add(compra);
+            compra.AddPedido(pedido);
+            compra.SetCliente(this);
         }
 
         public void ImprimeCompras()
         {
+            Console.WriteLine("---------------------------------------------------------------");
             Console.Write("Compra do Cliente: {0}, CPF: {1}\n\n", this.nome, this.cpf);
             foreach (Compra compra in compras)
             {
+                Console.WriteLine("Dados da NF:");
+                Console.WriteLine("CPF: {0} Valor: R${1}", compra.EmitirNotaFiscal().Cpf, compra.EmitirNotaFiscal().Valor);
                 compra.Imprime();
             }
         }

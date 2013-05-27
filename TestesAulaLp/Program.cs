@@ -22,28 +22,41 @@ namespace TestesAulaLp
             Loja Pizzaria = new Loja("Pizzaria do Zé", EndPizzaria, MatrizPrincipal);
             Loja Pastelaria = new Loja("Pastelaria do João", EndPastelaria, MatrizPrincipal);
 
-            Item Pizza = new Item("Pizza", 2, 2);
-            Item Pastel = new Item("Pastel", 5, 3);
-            Item Refrigerante = new Item("Refrigerante", 10, 1);
+            Produto Pizza = new Produto("Pizza", "Sabor Calabreza", 2);
+            Produto Pastel = new Produto("Pastel", "Sabor Carne", 5);
+            Produto Refrigerante = new Produto("Refrigerante", "Garrafa 2 Litros", 10);
 
-            Cliente Gabriel = new Cliente("Gabriel", "315.633.778.10");
+            Cliente Gabriel = new Cliente("Gabriel Pessoa", "315.633.778.10");
 
-            List<Item> Itens2 = new List<Item>();
-            Itens2.Add(Pizza);
-            Itens2.Add(Refrigerante);
+            Pedido pedido = new Pedido();
+            pedido.AddItem(new ItemPedido(2, Pizza));
+            pedido.AddItem(new ItemPedido(3, Refrigerante));
 
-            Gabriel.AddCompra(new Compra(Pizzaria), Itens2);
+            Pedido pedido2 = new Pedido();
+            pedido2.AddItem(new ItemPedido(3, Refrigerante));
+            pedido2.AddItem(new ItemPedido(5, Pastel));
 
-            List<Item> Itens = new List<Item>();
-            Itens.Clear();
-            Itens.Add(Pastel);
-            Itens.Add(Refrigerante);
+            List<Pedido> pedidosGabriel = new List<Pedido>();
+            pedidosGabriel.Add(pedido);
+            pedidosGabriel.Add(pedido2);
 
-            Gabriel.AddCompra(new Compra(Pastelaria), Itens);
+            Compra compra = new Compra(Pizzaria);
+            Gabriel.AddCompra(compra,pedidosGabriel);
+
+            Cliente Israel = new Cliente("Israel Florentino", "333.333.333.10");
+
+            Pedido pedido3 = new Pedido();
+
+            pedido3.AddItem(new ItemPedido(2, Pastel));
+            pedido3.AddItem(new ItemPedido(4, Refrigerante));
+
+            Compra compra2 = new Compra(Pastelaria);
+
+            Israel.AddCompra(compra2, pedido3);
 
             Gabriel.ImprimeCompras();
+            Israel.ImprimeCompras();
 
-            
             Console.ReadKey();
         }
     }
